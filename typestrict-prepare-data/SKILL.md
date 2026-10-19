@@ -38,6 +38,28 @@ license that allows commercial use).
 5. Keep each example within the base model's context (8,192 tokens, about 30,000 characters): longer ones are refused,
    never cut.
 
+## Getting the best model
+
+What we measured running public datasets through typestrict, and what the refund calculation asks for:
+
+- **Your own categories win.** The model beats Jev by far on decisions with the company's own answers (its queues,
+  teams, products, intents): BANKING77 0.889 against 0.797 macro-F1, a customer-support set 0.998 against 0.771. On
+  generic questions with little data (topic of a news text, type of a contract clause with a few hundred examples) Jev
+  knows a lot already and the margin is thin. Frame the decision around the user's own answers.
+- **Examples per answer matter more than the total.** Aim for hundreds of labeled examples per answer when the data has
+  them. Our base model is pretrained on decisions, which helps most with very few examples; with many, the data decides.
+- **Every answer needs enough examples.** The refund calculation checks the weakest answer too (it may not trail Jev by
+  more than 0.05 F1, among answers with 5 or more test examples). Merge answers that are rare and close, or collect more
+  of them, before training.
+- **Answers that do not overlap, with a description.** Each answer's description is part of what the model reads. Write
+  them so a person would never hesitate between two.
+- **The input the model will see in production.** Train on the text that exists at decision time, nothing that is only
+  known later (see the leak check above).
+- **One decision per model when the guarantee matters.** Several decisions on the same data train as one model measured
+  against its base model, without the refund. If the money-back guarantee matters, train one decision at a time.
+- **Consistent labels.** When the user labels the test examples, the same case must get the same answer every time: the
+  model is measured against those answers.
+
 Then use the `typestrict-train` skill to send it with the typestrict CLI or MCP server and train.
 
 Docs: https://docs.typestrict.ai (for assistants: https://docs.typestrict.ai/llms-full.txt).

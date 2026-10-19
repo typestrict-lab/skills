@@ -5,12 +5,11 @@ description: Train, follow and download a typestrict decision model with the typ
 
 # Train a typestrict model
 
-Use the typestrict MCP tools when they are available (`list_trainings`, `create_dataset`, `get_training`,
-`wait_for_change`, `structure_dataset`, `quote_training`, `start_training`...). Otherwise use the CLI, with `--json`
-when you need to read the answer:
+Use the typestrict MCP tools when they are available; otherwise the CLI, with `--json` when you need to read the
+answer. Each step below gives both.
 
 ```bash
-command -v typestrict || curl -fsSL https://typestrict.ai/install.sh | sh
+command -v typestrict || curl -fsSL https://raw.githubusercontent.com/typestrict-lab/cli/main/install.sh | sh
 typestrict credits            # checks the key; if refused, ask the user to run `typestrict login`
 ```
 
@@ -26,24 +25,28 @@ typestrict train data/tickets.csv --goal "Which team handles the ticket?" --watc
 # several decisions: --question "..." --question "..."
 ```
 
-`--watch` follows it until it needs the user and prints each step. Keep the dataset id it prints.
+MCP: `create_dataset` (local file paths, `hf`, `github`, `questions`), then `wait_for_change`. Keep the dataset id.
 
 ## 2. Follow next_action
 
-`typestrict status <id> --json` returns `step` and `next_action`. Act on it:
+`typestrict status <id> --json` (MCP: `get_training`) returns `step` and `next_action`. Act on it:
 
-| `next_action` | Do |
-| --- | --- |
-| `wait` | `typestrict status <id> --watch` (or the MCP tool `wait_for_change`). |
-| `structure` | `typestrict structure <id>`, or `typestrict suggest <id>` to see decisions first. |
-| `pick_decisions` | Show the suggestions (`typestrict review <id>`), then `typestrict structure <id> --question "..."`. |
-| `label_examples` | Ask the user to run `typestrict label <id>` (interactive), or with MCP ask each example (`next_example_to_label`, `label_example`). |
-| `start_training` | Go to step 3. |
-| `start_over` | The files could not be read: show the error and send fixed files. |
-| `expired` | The data expired (90 days without use): send it again. |
+| `next_action` | CLI | MCP |
+| --- | --- | --- |
+| `wait` | `typestrict status <id> --watch` | `wait_for_change` |
+| `structure` | `typestrict structure <id>`, or `typestrict suggest <id>` to see decisions first | `structure_dataset`, or `suggest_decisions` |
+| `pick_decisions` | `typestrict review <id>`, then `typestrict structure <id> --question "..."` | `get_training` (`structure.suggestions`), then `structure_dataset` with `questions` |
+| `label_examples` | The user runs `typestrict label <id>` (interactive) | Ask the user each example: `next_example_to_label`, `label_example` |
+| `start_training` | Step 3 | Step 3 |
+| `start_over` | The files could not be read: show the error and send fixed files | Same |
+| `expired` | The data expired (90 days without use): send it again | Same |
 
-Before training, show the user the agent's proposal (`typestrict review <id>`): the question, the answers and how many
-examples each has, and the warnings. To change it: `typestrict structure <id> --feedback "..."`.
+Before training, show the user the agent's proposal (`typestrict review <id>`, MCP `get_training`: `structure.spec` and
+`structure.stats`): the question, the answers and how many examples each has, and the warnings. To change it:
+`typestrict structure <id> --feedback "..."` (MCP `structure_dataset` with `feedback`).
+
+**Read the proposal before spending.** An answer with few examples, a warning, or answers that overlap are the usual
+reasons a model ends up refunded: fix them first (skill `typestrict-prepare-data`, "Getting the best model").
 
 ## 3. Start the training (costs a credit)
 
@@ -59,16 +62,21 @@ Without credits, send the user to https://typestrict.ai/billing.
 ## 4. The result
 
 ```bash
-typestrict result <model>
+typestrict result <model>          # MCP: get_model, and get_audit for the audit link
 ```
 
 `beats` means it beat Jev on the held-out examples; otherwise the credit came back. `retry` as next action means the
 training failed and the credit came back too.
 
+**After a refund**, read why in the comparison (`model.jev.superiority.reason`): a gain too small to be sure of, or one
+answer that trails Jev. More examples of the weak answers, or another base model on the same data, are the next tries:
+every version is measured on the same held-out examples, so versions compare fairly, and each refunded one costs nothing.
+`typestrict encoders` lists the base models that can be picked.
+
 ## 5. Download
 
 ```bash
-typestrict pull <model> --dir models/ticket-router
+typestrict pull <model> --dir models/ticket-router   # MCP: download_model
 ```
 
 The package (`decision_ai.json`, `tokenizer.json`, `onnx/model_8bit.onnx`) can be downloaded for 30 days after the

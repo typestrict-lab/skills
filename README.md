@@ -12,7 +12,7 @@ that beats Jev (or the credit comes back), follow it to the result, and put it t
 They use the [typestrict CLI](https://github.com/typestrict-lab/cli) and its MCP server:
 
 ```bash
-curl -fsSL https://typestrict.ai/install.sh | sh
+curl -fsSL https://raw.githubusercontent.com/typestrict-lab/cli/main/install.sh | sh
 typestrict login                          # an API key from https://typestrict.ai/settings#api-keys
 claude mcp add typestrict -- typestrict mcp   # or your assistant's setup: https://docs.typestrict.ai/agents
 ```

@@ -61,7 +61,10 @@ base URL.
 ## Before shipping
 
 - Keep the package files next to each other with these exact names; `decision_ai.json` checks their SHA-256.
-- Use the model's `confidence` to decide what to automate and what to send to a person.
+- Use the model's `confidence` to decide what to automate and what to send to a person. The refund calculation measures
+  exactly this: accuracy over the 80% most confident answers. Start by automating above a threshold and sending the rest
+  to a person, then move the threshold with what you see in production.
+- Keep the question and the options exactly as trained; a reworded option is a question the model never learned.
 - The files on typestrict are kept for 30 days after the training: keep your own copy.
 
 Docs: https://docs.typestrict.ai
