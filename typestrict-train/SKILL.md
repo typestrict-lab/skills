@@ -45,8 +45,28 @@ Before training, show the user the agent's proposal (`typestrict review <id>`, M
 `structure.stats`): the question, the answers and how many examples each has, and the warnings. To change it:
 `typestrict structure <id> --feedback "..."` (MCP `structure_dataset` with `feedback`).
 
-**Fix the proposal before training.** An answer with few examples, a warning, or answers that overlap are what hold a
-model back: fix them first (skill `typestrict-prepare-data`, "Getting the best model").
+### Make it a strong model before training
+
+Training takes a credit and some hours. As soon as the proposal is ready (before the user labels anything), go through
+it yourself and fix what you find with the user (`typestrict structure <id> --feedback "..."`, MCP `structure_dataset`
+with `feedback`), then read it again:
+
+1. **Examples per answer** (`structure.stats.per_label`). Hundreds per answer is where the model gets good, and an
+   answer needs at least 5 test examples to be measured. The test examples are 20% of the data (up to 2,000) when it
+   came with answers, or a random 150 the user labels when it did not: then an answer under about 3% of the data gets
+   fewer than 5. Merge a rare answer with its closest one, or ask the user for more examples of it.
+2. **Answers that overlap.** Read the samples (`structure.stats.samples`, 3 per answer). If two answers have samples a
+   person could swap, merge them or rewrite their descriptions until the line between them is clear. When the data had
+   no answer, `prelabel_agree` against `examples` shows how often the pre-labelers agreed: low agreement means the
+   answers or their descriptions are ambiguous.
+3. **Labels that look wrong.** A sample whose label does not match its text means the answer column is noisy or the
+   question is off: say so and fix the source of the answer.
+4. **Every warning** (`structure.stats.warnings`): each one names what to change.
+5. **Duplicates** (`structure.stats.duplicates`) and **leaks**: the text must be what exists when the decision is made.
+6. **The question.** It should be decided by the company's own answers (its queues, teams, products). A generic question
+   (topic, sentiment) is one large models already answer well; steer it to what only this company knows.
+
+Propose training only when this list is clean, and tell the user what you changed and why.
 
 ## 3. Start the training (costs a credit)
 

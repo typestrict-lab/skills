@@ -49,7 +49,9 @@ What we measured running public datasets through typestrict:
 - **Examples per answer matter more than the total.** Aim for hundreds of labeled examples per answer when the data has
   them. Our base model is pretrained on decisions, which helps most with very few examples; with many, the data decides.
 - **The weakest answer sets the bar.** A model is as good as its worst answer: one answer with few examples drags the
-  whole model down. Merge answers that are rare and close, or collect more of them, before training.
+  whole model down. An answer needs at least 5 test examples to be measured (the test examples are 20% of the
+  data, or 150 the user labels when the data has no answers): merge a rare answer with its closest one, or collect
+  more of it, before training.
 - **Answers that do not overlap, with a description.** Each answer's description is part of what the model reads. Write
   them so a person would never hesitate between two.
 - **The input the model will see in production.** Train on the text that exists at decision time, nothing that is only
