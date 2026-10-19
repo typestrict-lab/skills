@@ -45,8 +45,8 @@ Before training, show the user the agent's proposal (`typestrict review <id>`, M
 `structure.stats`): the question, the answers and how many examples each has, and the warnings. To change it:
 `typestrict structure <id> --feedback "..."` (MCP `structure_dataset` with `feedback`).
 
-**Read the proposal before spending.** An answer with few examples, a warning, or answers that overlap are the usual
-reasons a model ends up refunded: fix them first (skill `typestrict-prepare-data`, "Getting the best model").
+**Fix the proposal before training.** An answer with few examples, a warning, or answers that overlap are what hold a
+model back: fix them first (skill `typestrict-prepare-data`, "Getting the best model").
 
 ## 3. Start the training (costs a credit)
 
@@ -68,9 +68,9 @@ typestrict result <model>          # MCP: get_model, and get_audit for the audit
 `beats` means it beat Jev on the held-out examples; otherwise the credit came back. `retry` as next action means the
 training failed and the credit came back too.
 
-**After a refund**, read why in the comparison (`model.jev.superiority.reason`): a gain too small to be sure of, or one
-answer that trails Jev. More examples of the weak answers, or another base model on the same data, are the next tries:
-every version is measured on the same held-out examples, so versions compare fairly, and each refunded one costs nothing.
+**When it does not beat Jev**, read why in the comparison (`model.jev.superiority.reason`): a gain too small to be sure
+of, or one answer that trails Jev. More examples of the weak answers, or another base model on the same data, are the
+next tries: every version is measured on the same held-out examples, so versions compare fairly.
 `typestrict encoders` lists the base models that can be picked.
 
 ## 5. Download

@@ -29,7 +29,7 @@ license that allows commercial use).
 
 1. Open the file and confirm one example per row (or per document), with the text the decision is about.
 2. Find the answer column, if any, and count each answer. Warn when an answer has very few examples: the model learns
-   it worse, and the refund calculation checks the weakest answer too.
+   it worse, and that answer holds back the whole model.
 3. Remove columns that leak the answer from somewhere it would not exist at decision time (for example a "resolved by"
    timestamp when predicting the team).
 4. Personal data does not need to be removed: typestrict masks names, emails, phone numbers, documents (CPF, CNPJ) and
@@ -40,7 +40,7 @@ license that allows commercial use).
 
 ## Getting the best model
 
-What we measured running public datasets through typestrict, and what the refund calculation asks for:
+What we measured running public datasets through typestrict:
 
 - **Your own categories win.** The model beats Jev by far on decisions with the company's own answers (its queues,
   teams, products, intents): BANKING77 0.889 against 0.797 macro-F1, a customer-support set 0.998 against 0.771. On
@@ -48,15 +48,12 @@ What we measured running public datasets through typestrict, and what the refund
   knows a lot already and the margin is thin. Frame the decision around the user's own answers.
 - **Examples per answer matter more than the total.** Aim for hundreds of labeled examples per answer when the data has
   them. Our base model is pretrained on decisions, which helps most with very few examples; with many, the data decides.
-- **Every answer needs enough examples.** The refund calculation checks the weakest answer too (it may not trail Jev by
-  more than 0.05 F1, among answers with 5 or more test examples). Merge answers that are rare and close, or collect more
-  of them, before training.
+- **The weakest answer sets the bar.** A model is as good as its worst answer: one answer with few examples drags the
+  whole model down. Merge answers that are rare and close, or collect more of them, before training.
 - **Answers that do not overlap, with a description.** Each answer's description is part of what the model reads. Write
   them so a person would never hesitate between two.
 - **The input the model will see in production.** Train on the text that exists at decision time, nothing that is only
   known later (see the leak check above).
-- **One decision per model when the guarantee matters.** Several decisions on the same data train as one model measured
-  against its base model, without the refund. If the money-back guarantee matters, train one decision at a time.
 - **Consistent labels.** When the user labels the test examples, the same case must get the same answer every time: the
   model is measured against those answers.
 
