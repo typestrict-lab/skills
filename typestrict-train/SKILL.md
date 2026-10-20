@@ -6,10 +6,11 @@ description: Train, follow and download a typestrict decision model with the typ
 # Train a typestrict model
 
 Use the typestrict MCP tools when they are available; otherwise the CLI, with `--json` when you need to read the
-answer. Each step below gives both.
+answer. Each step below gives both. The MCP server is remote (`https://api.typestrict.ai/mcp`, the user signs in with
+OAuth) or local (`typestrict mcp`, with the CLI's key); setup for each assistant: https://docs.typestrict.ai/agents.
 
 ```bash
-command -v typestrict || curl -fsSL https://raw.githubusercontent.com/typestrict-lab/cli/main/install.sh | sh
+command -v typestrict || curl -fsSL https://typestrict.ai/install.sh | sh
 typestrict credits            # checks the key; if refused, ask the user to run `typestrict login`
 ```
 
@@ -25,7 +26,10 @@ typestrict train data/tickets.csv --goal "Which team handles the ticket?" --watc
 # several decisions: --question "..." --question "..."
 ```
 
-MCP: `create_dataset` (local file paths, `hf`, `github`, `questions`), then `wait_for_change`. Keep the dataset id.
+MCP: `create_dataset`, then `wait_for_change`. Keep the dataset id. With the local server pass file paths in `files`;
+with the remote one, pass the prepared table's text in `contents` (`name` with its extension, `text`). Files the remote
+server cannot take that way (Excel, PDF, zip, very large ones): ask the user to upload them at
+https://typestrict.ai/trainings/new and continue from `list_trainings`. Public sources: `hf`, `github`.
 
 ## 2. Follow next_action
 
@@ -49,7 +53,8 @@ Before training, show the user the agent's proposal (`typestrict review <id>`, M
 
 Training takes a credit and some hours. As soon as the proposal is ready (before the user labels anything), go through
 it yourself and fix what you find with the user (`typestrict structure <id> --feedback "..."`, MCP `structure_dataset`
-with `feedback`), then read it again:
+with `feedback`), then read it again. Each round reruns the agent: gather everything you want changed and send it in one
+feedback.
 
 1. **Examples per answer** (`structure.stats.per_label`). Hundreds per answer is where the model gets good, and an
    answer needs at least 5 test examples to be measured. The test examples are 20% of the data (up to 2,000) when it
@@ -98,6 +103,9 @@ next tries: every version is measured on the same held-out examples, so versions
 ```bash
 typestrict pull <model> --dir models/ticket-router   # MCP: download_model
 ```
+
+With the remote MCP server, `download_model` returns the package's download links: save the three files with these
+names, next to each other, in the user's project.
 
 The package (`decision_ai.json`, `tokenizer.json`, `onnx/model_8bit.onnx`) can be downloaded for 30 days after the
 training; a refunded model has none. Then use the `typestrict-integrate` skill.

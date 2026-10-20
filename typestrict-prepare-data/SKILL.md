@@ -5,8 +5,10 @@ description: Prepare data to train a typestrict decision model. Use when the use
 
 # Prepare data for typestrict
 
-typestrict trains a small model that makes one typed decision (pick an option, yes or no, or a score) on the user's data,
-and refunds the credit if it does not beat Jev, the market reference model. Good data is what makes it win.
+typestrict trains a small model that makes one typed decision (pick an option, yes or no, or a score) on the user's data
+and measures it against Jev, the market reference model. Good data is what makes it win, and you are in the best place
+to prepare it: you can open the user's files, ask them what each column means and fix what is wrong before anything is
+sent. Do that work here instead of leaving it to the typestrict agent.
 
 ## What the user needs to know first
 
@@ -25,18 +27,26 @@ and refunds the credit if it does not beat Jev, the market reference model. Good
 Limits: 200 MB per file, 500 files per dataset, 10 public sources (Hugging Face datasets, GitHub repositories with a
 license that allows commercial use).
 
-## Check before uploading
+## Prepare it yourself
 
-1. Open the file and confirm one example per row (or per document), with the text the decision is about.
-2. Find the answer column, if any, and count each answer. Warn when an answer has very few examples: the model learns
-   it worse, and that answer holds back the whole model.
-3. Remove columns that leak the answer from somewhere it would not exist at decision time (for example a "resolved by"
-   timestamp when predicting the team).
-4. Personal data does not need to be removed: typestrict masks names, emails, phone numbers, documents (CPF, CNPJ) and
-   card numbers before anything else reads the files, and deletes the original. Only set `anonymize: false` when the
-   user states the files hold no personal data.
-5. Keep each example within the base model's context (8,192 tokens, about 30,000 characters): longer ones are refused,
-   never cut.
+Build one clean table (CSV or JSON lines) and send that, not the raw export:
+
+1. **One row per example**, with a text column holding everything the decision is made on (join subject and body, or
+   the fields a person would read) and nothing else.
+2. **The answer column**, if the data has past answers. Normalize it: the same answer spelled the same way (`Billing`,
+   `billing ` and `Faturamento` are one answer), empty and "other" rows out unless "other" is a real answer.
+3. **Count each answer** and fix the rare ones now: merge an answer with its closest one, or ask the user for more
+   examples of it (see "The weakest answer sets the bar" below).
+4. **Remove leaks**: columns or text that only exist after the decision (a "resolved by" field or a closing note when
+   predicting the team).
+5. **Remove exact duplicates**, and examples longer than the base model's context (8,192 tokens, about 30,000
+   characters): longer ones are refused, never cut.
+6. **Write the decision** for `goal`: the question in plain words, and the answers with one line each on when each one
+   applies. The more precise this is, the closer the agent's first proposal is to what the user wants.
+
+Show the user the counts per answer and what you changed before sending. Personal data does not need to be removed:
+typestrict masks names, emails, phone numbers, documents (CPF, CNPJ) and card numbers before anything else reads the
+files, and deletes the original. Only set `anonymize: false` when the user states the files hold no personal data.
 
 ## Getting the best model
 

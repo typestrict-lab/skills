@@ -1,7 +1,7 @@
 # typestrict skills
 
-Skills that teach AI assistants to work with [typestrict](https://typestrict.ai): prepare data, train a decision model
-that beats Jev (or the credit comes back), follow it to the result, and put it to work.
+Skills that put AI assistants to work with [typestrict](https://typestrict.ai): they prepare the data, check and fix
+the training proposal, train a decision model that beats Jev, follow it to the result, and put it to work.
 
 | Skill | What it does |
 | --- | --- |
@@ -9,29 +9,34 @@ that beats Jev (or the credit comes back), follow it to the result, and put it t
 | [typestrict-train](typestrict-train/SKILL.md) | Uploads, answers the review, starts the training (asking before spending), follows it and downloads the model. |
 | [typestrict-integrate](typestrict-integrate/SKILL.md) | Calls the trained model from an app or service. |
 
-They use the [typestrict CLI](https://github.com/typestrict-lab/cli) and its MCP server:
+They use the typestrict MCP server, remote (`https://api.typestrict.ai/mcp`, sign in with your typestrict account) or
+local (`typestrict mcp` from the [typestrict CLI](https://github.com/typestrict-lab/cli)), and the CLI itself:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/typestrict-lab/cli/main/install.sh | sh
-typestrict login                          # an API key from https://typestrict.ai/settings#api-keys
-claude mcp add typestrict -- typestrict mcp   # or your assistant's setup: https://docs.typestrict.ai/agents
+claude mcp add --transport http typestrict https://api.typestrict.ai/mcp   # or your assistant's setup:
+                                                                           # https://docs.typestrict.ai/agents
 ```
 
 ## Install
 
-**Claude Code**
-
 ```bash
 git clone https://github.com/typestrict-lab/skills.git
-cp -r skills/typestrict-* ~/.claude/skills/        # for every project
-# or: cp -r skills/typestrict-* .claude/skills/    # for this project only
 ```
 
-**Claude.ai and Claude Desktop:** zip a skill folder and upload it in **Settings → Capabilities → Skills**.
+| Assistant | Copy the `typestrict-*` folders into |
+| --- | --- |
+| Claude Code | `~/.claude/skills/` (every project) or `.claude/skills/` |
+| Codex, Cursor, GitHub Copilot, Antigravity, opencode | `.agents/skills/` in the project, or `~/.agents/skills/` |
+| Devin Desktop and Devin CLI | `.devin/skills/` |
 
-**Other assistants** (Codex, Cursor, Copilot, Windsurf, Gemini CLI): skills are plain Markdown. Copy the folders into
-your project and point your instruction file (`AGENTS.md`, `.cursor/rules`, `.github/copilot-instructions.md`,
-`.windsurf/rules`, `GEMINI.md`) at them, or follow the setup for your assistant at
+```bash
+mkdir -p .agents/skills && cp -r skills/typestrict-* .agents/skills/
+```
+
+**Claude.ai and Claude Desktop:** zip a skill folder (the zip holds `typestrict-train/SKILL.md`) and upload it in
+**Customize → Skills**.
+
+**ChatGPT:** add the skills' text to the project instructions. Setup for each assistant:
 [docs.typestrict.ai/agents](https://docs.typestrict.ai/agents).
 
 ## License
