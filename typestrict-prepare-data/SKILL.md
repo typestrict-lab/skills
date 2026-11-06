@@ -39,9 +39,12 @@ Build one clean table (CSV or JSON lines) and send that, not the raw export:
    examples of it (see "The weakest answer sets the bar" below).
 4. **Remove leaks**: columns or text that only exist after the decision (a "resolved by" field or a closing note when
    predicting the team).
-5. **Remove exact duplicates**, and examples longer than the base model's context (8,192 tokens, about 30,000
-   characters): longer ones are refused, never cut.
-6. **Write the decision** for `goal`: the question in plain words, and the answers with one line each on when each one
+5. **Remove exact duplicates**, and examples longer than 20,000 characters: longer ones are refused, never cut. A model
+   of several decisions reads up to 4,096 tokens of each example (about 15,000 characters of English).
+6. **Put what decides the answer first.** When the text joins several parts (a description and a diff, a subject and
+   a long thread), start with the part that decides the answer. If an example is longer than what the model reads, the
+   end is what it may not see, and two examples that look the same to the model with opposite answers teach it nothing.
+7. **Write the decision** for `goal`: the question in plain words, and the answers with one line each on when each one
    applies. The more precise this is, the closer the agent's first proposal is to what the user wants.
 
 Show the user the counts per answer and what you changed before sending. Personal data does not need to be removed:
@@ -66,6 +69,16 @@ What we measured running public datasets through typestrict:
   them so a person would never hesitate between two.
 - **The input the model will see in production.** Train on the text that exists at decision time, nothing that is only
   known later (see the leak check above).
+- **Positives and negatives that look alike.** If one answer's examples all share a style (longer, better written, from
+  another source), the model learns the style and not the content. Collect the examples of every answer the same way,
+  so the only difference between them is the thing being decided.
+- **Do not throw data away to balance the answers.** Equalizing the counts moves where the model draws the line, not how
+  well it separates the answers; the line is set later, with the confidence threshold (skill `typestrict-integrate`).
+  Rare answers need more examples, not fewer of the common ones.
+- **Leave to a rule what a rule decides.** A secret in the text, a forbidden word, a field that is empty: check them in
+  code, next to the model, and train the model on what needs judgment.
+- **Split a hard question.** A broad question ("is this change risky?") is easier to learn as a few concrete ones ("does
+  it break compatibility?", "are the tests enough?"), trained together as one model of several decisions.
 - **Consistent labels.** When the user labels the test examples, the same case must get the same answer every time: the
   model is measured against those answers.
 

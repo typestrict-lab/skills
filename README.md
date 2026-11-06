@@ -7,7 +7,7 @@ the training proposal, train a decision model that beats Jev, follow it to the r
 | --- | --- |
 | [typestrict-prepare-data](typestrict-prepare-data/SKILL.md) | Checks and shapes the user's data before training. |
 | [typestrict-train](typestrict-train/SKILL.md) | Uploads, answers the review, starts the training (asking before spending), follows it and downloads the model. |
-| [typestrict-integrate](typestrict-integrate/SKILL.md) | Calls the trained model from an app or service. |
+| [typestrict-integrate](typestrict-integrate/SKILL.md) | Runs the trained model: the container behind Jev's API on a server, or the package in an app. |
 
 They use the typestrict MCP server, remote (`https://api.typestrict.ai/mcp`, sign in with your typestrict account) or
 local (`typestrict mcp` from the [typestrict CLI](https://github.com/typestrict-lab/cli)), and the CLI itself:
