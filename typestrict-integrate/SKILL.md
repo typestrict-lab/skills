@@ -52,7 +52,11 @@ curl http://localhost:8080/v1/systemone -H "Content-Type: application/json" -d '
 - **Memory**: each worker session takes about 400 MB idle and up to about 2.3 GB after reading a 4,096-token input; the
   container starts as many workers as its memory limit allows. Give it 2 GB or more.
 - **Latency grows faster than the input**: a few hundred tokens answer in a fraction of a second on a CPU, a 4,096-token
-  input takes seconds. Send the text the decision needs, not more.
+  input takes seconds. Send the text the decision needs, not more. The options are read with the text, so long option
+  descriptions cost as much as a long text.
+- **Few requests at a time: give one worker every CPU.** The default (one thread per worker) is tuned for concurrent
+  traffic; for a chat, a back office or a nightly job set `TYPESTRICT_WORKERS=1 TYPESTRICT_THREADS=<CPUs>`. Measured on 4
+  CPUs with a 10-option model: 2.2 s per request by default, 0.74 s this way, with about the same throughput under load.
 
 Deploy recipes (Docker, Kubernetes, Cloud Run, Lambda): https://docs.typestrict.ai/deploy.
 
@@ -65,7 +69,9 @@ model/
   onnx/model_8bit.onnx the model, about 160 MB, runs on a CPU
 ```
 
-Keep the files next to each other with these exact names: `decision_ai.json` checks their SHA-256.
+Keep the files next to each other with these exact names: `decision_ai.json` checks their SHA-256. The model page's
+download button and `GET /v1/models/{id}/files` (`package.zip`) give the three together; `typestrict pull <model>`
+writes them in place.
 
 ### Flutter (iOS, Android, web): decision_ai
 
